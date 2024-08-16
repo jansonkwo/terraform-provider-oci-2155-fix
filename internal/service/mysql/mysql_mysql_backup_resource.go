@@ -736,6 +736,18 @@ func (s *MysqlMysqlBackupResourceCrud) Delete() error {
 
 	if s.isBackupCopy() {
 		destinationRegion := utils.GetEnvSettingWithBlankDefault("destination_region")
+		if destinationRegion == "" {
+			configProvider := *s.Client.ConfigurationProvider()
+			if configProvider == nil {
+				return fmt.Errorf("cannot access ConfigurationProvider")
+			}
+
+			currentRegion, error := configProvider.Region()
+			if error != nil {
+				return fmt.Errorf("cannot access Region for the current ConfigurationProvider")
+			}
+			destinationRegion = currentRegion
+		}
 		s.Client.SetRegion(destinationRegion)
 	}
 
